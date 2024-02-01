@@ -1,76 +1,90 @@
 using TMPro;
 using UnityEngine;
-
+ 
 public class Player : Character
 {
-    // Used to get a reference to the prefab
+    // UI elements
     public HealthBar healthBarPrefab;
-
-    // A copy of the health bar prefab
     HealthBar healthBar;
-
-    //Text to screen
     public TextMeshProUGUI keysText;
     public TextMeshProUGUI gameConditionText;
     public TextMeshProUGUI timerText;
-
-    // Number to keep track of how much time is left
-    [SerializeField] public float remainingTime;
-    public float elapsedTime;
-    public float timeSS;
-
+ 
+    // Timer and health fields
+    public float remainingTime = 60f; // Start with 1 minute
+    public float startingTime = 60f; // Starting time for reference
+ 
+    private float elapsedTime;
+ 
     // Start is called before the first frame update
     private void Start()
     {
-        // Start the player off with the starting hit point value
-        hitPoints = startingHitPoints;
-
-        // Get a copy of the health bar prefab and store a reference to it
+ 
+        // Set initial health and timer
+        hitPoints = startingHitPoints = 100; // Assuming 100 is the full health
+ 
+        // Instantiate the health bar and set its references
         healthBar = Instantiate(healthBarPrefab);
-
-        // Set the healthBar's character property to this character so it can retrieve hit points & max hit points
         healthBar.character = this;
+        healthBar.player = this;
     }
-
+ 
     // Update is called once per frame
     private void Update()
     {
-        //Timer for decreasing health
-        if (hitPoints > 0 && keys < 5)
+        // Timer and health decrement logic
+        elapsedTime += Time.deltaTime;
+        if (elapsedTime >= 1.0f)
         {
-            timeSS = Time.deltaTime;
-            remainingTime -= timeSS;
-            elapsedTime += timeSS;
+            elapsedTime = 0;
+            if (remainingTime > 0 && hitPoints > 0)
+            {
+                remainingTime -= 1;
+                hitPoints -= 5; // Decrease hit points by 5 every second
+                if (hitPoints < 0) hitPoints = 0; // Ensure hit points don't go below 0
+            }
         }
-        else if (remainingTime < 0)
-        {
-            remainingTime = 0;
-            elapsedTime = 100;
-        }
-
-        //Print the time remaining to screen
+ 
+        // Update the timer display
+        UpdateTimerDisplay();
+        UpdateGameConditionText();
+    }
+ 
+    private void UpdateTimerDisplay()
+    {
         int minutes = Mathf.FloorToInt(remainingTime / 60);
         int seconds = Mathf.FloorToInt(remainingTime % 60);
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-
-        // Decrease hit points every second
-        if (elapsedTime >= 1.0f)
+    }
+ 
+    private void UpdateGameConditionText()
+    {
+        if (hitPoints <= 0 || remainingTime <= 0)
         {
-            losingHitPoints(1);
-            elapsedTime = 0; // Reset the timer
-        }
-        if (hitPoints <= 0)
-        {
-            gameConditionText.text = "YOU DIED!! :(\n" + "Press ESC to exit or Spacebar to replay";
+            gameConditionText.text = "YOU DIED!! :(\nPress ESC to exit or Spacebar to replay";
             timerText.text = "0:00";
         }
-        if (keys >= 5)
+        else if (keys >= 5)
         {
-            gameConditionText.text = "YOU WIN!! :)\n" + "Press ESC to exit or Spacebar to replay";
+            gameConditionText.text = "YOU WIN!! :)\nPress ESC to exit or Spacebar to replay";
         }
-
     }
-
+ 
+    // Example method to handle picking up a heart
+    public void PickupHeart(int healthAmount, float timeAmount)
+    {
+        // Maximum values
+        float maxTime = 100f; // 1 minute and 40 seconds
+        maxHitPoints = 100;
+ 
+        // Increase health by 10, ensuring it doesn't exceed maxHitPoints
+        hitPoints = Mathf.Min(hitPoints + 10, maxHitPoints);
+ 
+        // Increase remaining time by 10 seconds, ensuring it doesn't exceed maxTime
+        // Adding Mathf.Epsilon to account for any floating point imprecision
+        remainingTime = Mathf.Min(remainingTime + 10 + Mathf.Epsilon, maxTime);
+    }
+ 
     // Called when player's collider touches an "Is Trigger" collider
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -80,23 +94,23 @@ public class Player : Character
             // Grab a reference to the Item (scriptable object) inside the Consumable class and assign it to hitObject
             // Note: at this point it is a coin, but later may be other types of CanBePickedUp objects
             Item hitObject = collision.gameObject.GetComponent<Consumable>().item;
-
+ 
             // Check for null to make sure it was successfully retrieved, and avoid potential errors
             if (hitObject != null)
             {
                 // debugging
                 print("it: " + hitObject.objectName);
-
+ 
                 // indicates if the collision object should disappear
                 bool shouldDisappear = false;
-
+ 
                 switch (hitObject.itemType)
                 {
                     case Item.ItemType.COIN:
                         // coins should disappear by default and should be added to inventory
                         shouldDisappear = true;
                         break;
-
+ 
                     case Item.ItemType.HEALTH:
                         // hearts should disappear if they adjust the player's hit points
                         // when health meter is full, hearts aren't picked up and remain in the scene
@@ -110,7 +124,7 @@ public class Player : Character
                             remainingTime = 101;
                         }
                         break;
-
+ 
                     case Item.ItemType.KEY:
                         // Keys should disappear and then increase the amount the player has
                         //Also prints amount of keys to screen
@@ -122,11 +136,11 @@ public class Player : Character
                             keysText.text = "Keys: " + keys + "/5";
                         }
                         break;
-
+ 
                     default:
                         break;
                 }
-
+ 
                 // Hide the game object in the scene to give the illusion of picking up
                 if (shouldDisappear)
                 {
@@ -135,8 +149,8 @@ public class Player : Character
             }
         }
     }
-    
 
+ 
     //Function to call to increase hitpoints
     public bool increaseHitPoints(int amount)
     {
@@ -157,11 +171,11 @@ public class Player : Character
                 return true;
             }
         }
-
+ 
         // Return false if hit points is at max and can't be adjusted
         return false;
     }
-
+ 
     //Function to decrease character health
     public bool losingHitPoints(int amount)
     {
@@ -172,7 +186,7 @@ public class Player : Character
             print("Lost hitpoints by: " + amount + ". New value: " + hitPoints);
             return true;
         }
-
+ 
         // Return false if hit points is at max and can't be adjusted
         return false;
     }
