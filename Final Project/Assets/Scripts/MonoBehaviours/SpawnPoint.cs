@@ -6,7 +6,7 @@ public class SpawnPoint : MonoBehaviour
     public GameObject prefabToSpawn;
 
     // Used to spawn multiple copies at a set interval (primarily for enemy objects)
-    public float repeatInterval;
+    public float repeatInterval = 25.0f;
 
     // Start is called before the first frame update
     void Start()
