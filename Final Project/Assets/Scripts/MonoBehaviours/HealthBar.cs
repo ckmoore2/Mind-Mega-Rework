@@ -1,40 +1,80 @@
+[6:17 PM] Phillips, Evan Joseph
 using System.Collections;
+
 using System.Collections.Generic;
+
 using UnityEngine;
+
 using UnityEngine.UI;
+
 using TMPro;
-
+ 
 public class HealthBar : MonoBehaviour
+
 {
-    // Reference to the current Player object to get hit point fields
-    // Will be set programmatically, instead of through the Unity Editor, so it is hidden in the Inspector window
+
     [HideInInspector]
-    public Player character;
 
-    // For convenience, a direct reference to the health bar meter; set through the Unity Editor
-    public Image meterImage;
+    public Player character; // Reference to the Player object
+ 
+    public Image meterImage; // Reference to the health bar meter
 
-    // For convenience, a direct reference to the text in the health bar and timer; set through the Unity Editor
-    public TextMeshProUGUI hpText;
+    public TextMeshProUGUI hpText; // Reference to the text in the health bar
 
-    // Update is called once per frame
+    public Player player; // Additional reference to the player for timer access
+ 
     void Update()
+
     {
-       
-        if (character.hitPoints > 0 && character.keys < 5)
-        {
-            // set the meter's fill amount; must be a value between 0 and 1
-            meterImage.fillAmount = character.hitPoints / character.maxHitPoints;
 
-            // modify the text
-            hpText.text = "HP:" + (meterImage.fillAmount * 100);
+        // Ensure the player and character references are set
+
+        if (player == null || character == null)
+
+        {
+
+            Debug.LogError("Player or Character reference not set in HealthBar");
+
+            return;
 
         }
-        if (character.hitPoints <= 0)
+ 
+        if (player.hitPoints > 0 && player.keys < 5)
+
         {
-            //To make sure HP Text and HP bar matches when character dies
+
+            // Calculate health percentage and time percentage
+
+            float healthPercentage = Mathf.Clamp(player.hitPoints / character.maxHitPoints, 0f, 1f);
+
+            float timePercentage = Mathf.Clamp(player.remainingTime / player.startingTime, 0f, 1f);
+ 
+            // Use the lower of the two percentages for the health bar
+
+            float displayPercentage = Mathf.Min(healthPercentage, timePercentage);
+ 
+            // Set the health bar's fill amount
+
+            meterImage.fillAmount = displayPercentage;
+ 
+            // Modify the text to show the current HP value
+
+            hpText.text = "HP: " + Mathf.FloorToInt(player.hitPoints);
+
+        }
+ 
+        if (player.hitPoints <= 0)
+
+        {
+
+            // Match HP Text and HP bar when character dies
+
             hpText.text = "HP: 0";
+
             meterImage.fillAmount = 0;
+
         }
+
     }
+
 }
