@@ -5,7 +5,6 @@ public abstract class Character : MonoBehaviour
 {
     // Properties
     public float hitPoints;
-    public float maxHitPoints;
     public float startingHitPoints;
     public int keys;
 

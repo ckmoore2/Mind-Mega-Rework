@@ -1,4 +1,4 @@
-[6:17 PM] Phillips, Evan Joseph
+//[6:17 PM] Phillips, Evan Joseph
 using System.Collections;
 
 using System.Collections.Generic;
@@ -45,21 +45,20 @@ public class HealthBar : MonoBehaviour
 
             // Calculate health percentage and time percentage
 
-            float healthPercentage = Mathf.Clamp(player.hitPoints / character.maxHitPoints, 0f, 1f);
+            float displayPercentage = Mathf.Clamp(Mathf.Min(player.hitPoints, 100) / 100, 0f, 1f);
 
-            float timePercentage = Mathf.Clamp(player.remainingTime / player.startingTime, 0f, 1f);
- 
-            // Use the lower of the two percentages for the health bar
-
-            float displayPercentage = Mathf.Min(healthPercentage, timePercentage);
- 
             // Set the health bar's fill amount
 
             meterImage.fillAmount = displayPercentage;
  
             // Modify the text to show the current HP value
 
-            hpText.text = "HP: " + Mathf.FloorToInt(player.hitPoints);
+            if (player.hitPoints > 100) {
+                hpText.text = "HP: 100 (+" + (Mathf.FloorToInt(player.hitPoints) - 100) + ")";
+            } else
+            {
+                hpText.text = "HP: " + Mathf.FloorToInt(player.hitPoints);
+            }
 
         }
  
