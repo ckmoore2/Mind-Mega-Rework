@@ -28,7 +28,7 @@ public class Player : Character
     // Update is called once per frame
     private void Update()
     {
-        hitPoints -= Time.deltaTime;
+        hitPoints -= 3* Time.deltaTime;
         if (hitPoints < 0)
         {
             hitPoints = 0;
