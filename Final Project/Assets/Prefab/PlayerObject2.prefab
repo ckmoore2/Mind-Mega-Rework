@@ -605,8 +605,7 @@ MonoBehaviour:
   gameConditionText: {fileID: 1823147123}
   timerText: {fileID: 0}
   remainingTime: 101
-  elapsedTime: 0
-  timeSS: 0
+  startingTime: 60
 --- !u!1 &8490877194197782680
 GameObject:
   m_ObjectHideFlags: 0
