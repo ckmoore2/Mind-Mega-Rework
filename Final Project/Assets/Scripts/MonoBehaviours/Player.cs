@@ -32,6 +32,18 @@ public class Player : Character
     // Update is called once per frame
     private void Update()
     {
+        hitPoints -= 3 * Time.deltaTime;
+
+        if (hitPoints < 0)
+        {
+            hitPoints = 0;
+        }
+
+        UpdateGameConditionText();
+
+    }
+
+
         // Timer and health decrement logic
         elapsedTime += Time.deltaTime;
         if (elapsedTime >= 1.0f)
